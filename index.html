@@ -445,7 +445,6 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
 
   // Final submit → Sheet + WhatsApp
   document.getElementById('fspQSubmit').addEventListener('click', function(){
-    trackLead();
     var name=document.getElementById('fspName').value.trim();
     var d=document.getElementById('fspPhone').value.replace(/\D/g,'');
     if(d.length===12&&d.indexOf('91')===0) d=d.slice(2);
@@ -493,7 +492,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   var ov = document.getElementById('fspQuoteOverlay');
   if(!ov) return;
   var closeBtn = document.getElementById('fspQuoteClose');
-  function openQ(e){ if(e) e.preventDefault(); trackLead(); ov.classList.add('fsp-open'); document.body.style.overflow='hidden'; }
+  function openQ(e){ if(e) e.preventDefault(); ov.classList.add('fsp-open'); document.body.style.overflow='hidden'; }
   function closeQ(){ ov.classList.remove('fsp-open'); document.body.style.overflow=''; if(location.hash==='#quote'){ history.replaceState(null,'',location.pathname); } }
 
   // "Free Quote" button-கள் / #quote link-கள்
@@ -567,7 +566,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxha15SmPzC55PdXKtZ1YzHvp-anEAzabPlIPHJzV_OhXa8yiKjo6dupvojYtKDr8q6PA/exec';
   var WA_NUMBER = '919585905905';
   
-  function openAppt(e){ if(e) e.preventDefault(); trackSchedule(); ov.classList.add('fsp-open'); document.body.style.overflow='hidden'; buildTimeSlots(); }
+  function openAppt(e){ if(e) e.preventDefault(); ov.classList.add('fsp-open'); document.body.style.overflow='hidden'; buildTimeSlots(); }
   function closeAppt(){ ov.classList.remove('fsp-open'); document.body.style.overflow=''; if(location.hash==='#appointment'){ history.replaceState(null,'',location.pathname); } }
   
   // Wire open/close
@@ -601,7 +600,6 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   
   // Form submit
   submitBtn.addEventListener('click', function(){
-    trackSchedule();
     var date = dateInput.value.trim();
     var time = timeSelect.value;
     var name = nameInput.value.trim();
