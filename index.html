@@ -176,7 +176,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
       <p class="hero-tagline">"Insurance விற்பனை அல்ல – பாதுகாப்பான உறவு."</p>
       <div class="hero-btns">
         <a href="tel:+919585905905" class="btn-primary" onclick="trackContact()">📞 இப்போதே அழையுங்கள்</a>
-        <a href="#quote" class="btn-quote" data-open-quote onclick="trackLead()">💬 இலவச Quote</a>
+        <a href="#quote" class="btn-quote" data-open-quote onclick="trackLead()">💬 இலவச பிரீமியம் Quote</a>
         <a href="#appointment" class="btn-appointment" data-open-appointment onclick="trackSchedule()">📅 Appointment Book</a>
       </div>
     </div>
@@ -717,6 +717,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
       <div class="contact-item"><div class="ci-icon">📞</div><div><div class="ci-label">Phone</div><div class="ci-value"><a href="tel:+919585905905">+91 9585 905 905</a></div><div class="ci-value"><a href="tel:+919363705905">+91 9363 705 905</a></div></div></div>
       <div class="contact-item"><div class="ci-icon">📧</div><div><div class="ci-label">Email</div><div class="ci-value"><a href="mailto:futuresecureproviders@gmail.com">futuresecureproviders@gmail.com</a></div></div></div>
       <div class="contact-item"><div class="ci-icon">🌐</div><div><div class="ci-label">Social Media</div><div class="ci-value"><a href="https://www.facebook.com/FutureSecureProviders" target="_blank">Facebook</a> &nbsp;|&nbsp; <a href="https://www.instagram.com/vjstalinvlogs" target="_blank">Instagram</a></div></div></div>
+      <div class="contact-item"><div class="ci-icon">💬</div><div><div class="ci-label">WhatsApp</div><div class="ci-value"><a href="https://wa.me/919585905905?text=வணக்கம், எனக்கு Health Insurance பற்றி தெரிந்துகொள்ள வேண்டும்." target="_blank" onclick="trackContact()">+91 9585 905 905</a></div></div></div>
       <div style="margin-top:16px;padding:24px;background:rgba(0,212,212,0.06);border:1px solid rgba(0,212,212,0.15);border-radius:10px;">
         <p style="font-family:Noto Sans Tamil;font-size:14px;color:var(--text-body);line-height:1.9;">📌 நம்ம ஊர்ல சொல்லுற மாதிரி, <strong style="color:var(--cyan)">ஆபத்து நேரத்துல உதவிக்குக் காசு.</strong><br><br>உங்கள் குடும்பத்திற்கு சரியான Health Insurance தேர்வு செய்ய இப்போதே தொடர்பு கொள்ளுங்கள்.</p>
       </div>
@@ -846,33 +847,7 @@ if(window.location.hash === "#thankyou") {
   history.replaceState(null, "", window.location.pathname);
 }
 </script>
-<!-- ===== FSP WhatsApp Floating Button ===== -->
-<a href="https://wa.me/919585905905?text=வணக்கம், எனக்கு Health Insurance பற்றி தெரிந்துகொள்ள வேண்டும்."
-   class="fsp-wa-btn" target="_blank" rel="noopener"
-   aria-label="WhatsApp-ல் தொடர்பு கொள்ள"
-   onclick="trackContact()">
-  <svg viewBox="0 0 32 32" width="30" height="30" fill="#fff" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16.003 3C9.373 3 3.99 8.383 3.99 15.01c0 2.646.86 5.1 2.32 7.09L4.5 29l7.09-1.86a12 12 0 0 0 4.41.84h.003C22.633 27.98 28 22.6 28 15.97 28 8.383 22.63 3 16.003 3zm0 21.86h-.003a9.9 9.9 0 0 1-5.05-1.38l-.36-.214-3.744.98 1-3.65-.235-.375a9.86 9.86 0 0 1-1.51-5.246c0-5.463 4.447-9.91 9.913-9.91 2.65 0 5.14 1.034 7.01 2.91a9.84 9.84 0 0 1 2.9 7.01c0 5.463-4.446 9.91-9.91 9.91zm5.44-7.42c-.297-.15-1.758-.868-2.03-.967-.272-.1-.47-.15-.668.15-.198.297-.767.966-.94 1.164-.174.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.76-1.653-2.058-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.15-.174.198-.298.297-.497.099-.198.05-.372-.025-.52-.075-.15-.668-1.612-.916-2.206-.24-.578-.485-.5-.668-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.478 0 1.462 1.065 2.875 1.213 3.073.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.695.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-  </svg>
-</a>
 
-<style>
-  .fsp-wa-btn{
-    position:fixed; right:20px; bottom:20px;
-    width:56px; height:56px; background:#25D366;
-    border-radius:50%; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:9999;
-    transition:transform .2s ease; animation:fsp-wa-pulse 2.5s infinite;
-  }
-  .fsp-wa-btn:hover{ transform:scale(1.08); }
-  @keyframes fsp-wa-pulse{
-    0%{ box-shadow:0 0 0 0 rgba(37,211,102,.5); }
-    70%{ box-shadow:0 0 0 14px rgba(37,211,102,0); }
-    100%{ box-shadow:0 0 0 0 rgba(37,211,102,0); }
-  }
-  @media(max-width:600px){ .fsp-wa-btn{ right:16px; bottom:16px; width:52px; height:52px; } }
-</style>
-<!-- ===== End WhatsApp Button ===== -->
 
 <!-- ===== FSP UTM Tracking ===== -->
 <script>
