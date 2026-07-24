@@ -160,6 +160,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
     <a href="#services">Services</a>
     <a href="#why">Why Us</a>
     <a href="#about">About</a>
+    <a href="#emi" class="nav-cta" data-open-emi onclick="trackLead()" style="background:rgba(255,107,53,0.9)!important;">📊 EMI Calculator</a>
     <a href="#quote" class="nav-cta" data-open-quote onclick="trackLead()">இலவச பிரீமியம் Quote</a>
   </div>
 </nav>
@@ -283,7 +284,118 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   .fsp-q-done h3{color:var(--cyan);font-family:"Noto Sans Tamil",sans-serif;margin:8px 0;font-size:22px;}
   .fsp-q-done p{color:var(--text-body);font-size:14px;font-family:"Noto Sans Tamil",sans-serif;line-height:1.6;}
   @media(max-width:600px){.fsp-q-grid{grid-template-columns:1fr;}}
+  /* ===== EMI Calculator Modal Styles ===== */
+  .fsp-emi-overlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(4,20,20,.85);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
+  .fsp-emi-overlay.fsp-open{display:flex;}
+  .fsp-emi-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:40px 35px;max-width:700px;width:100%;margin:20px auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .fsp-emi-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:32px;line-height:1;color:var(--white);cursor:pointer;transition:.3s;}
+  .fsp-emi-close:hover{color:var(--cyan);}
+  .fsp-emi-container{margin-top:24px;}
+  .emi-form-group{margin-bottom:24px;}
+  .emi-form-group label{display:block;font-size:14px;font-weight:700;color:var(--white);margin-bottom:8px;font-family:"Noto Sans Tamil",sans-serif;}
+  .emi-required{color:#ff6b6b;}
+  .emi-form-group input,.emi-form-group select{width:100%;padding:12px 15px;border:1px solid var(--card-border);border-radius:8px;font-size:15px;background:rgba(11,42,42,0.5);color:var(--white);font-family:inherit;transition:border-color .3s;}
+  .emi-form-group input::placeholder{color:rgba(200,232,232,.5);}
+  .emi-form-group input:focus,.emi-form-group select:focus{outline:none;border-color:var(--cyan);background:rgba(11,42,42,0.8);}
+  .emi-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .emi-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--cyan),#00a8a8);color:var(--dark);border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:all .3s;margin-top:10px;box-shadow:0 4px 15px rgba(0,212,212,.3);}
+  .emi-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,212,212,.45);}
+  .emi-btn:active{transform:scale(.98);}
+  .emi-note{background:rgba(0,212,212,.08);border-left:4px solid var(--cyan);padding:15px;border-radius:6px;margin:25px 0;font-size:13px;color:var(--text-body);line-height:1.7;font-family:"Noto Sans Tamil",sans-serif;}
+  .emi-results{background:rgba(11,42,42,.6);border:1px solid rgba(0,212,212,.2);border-radius:12px;padding:25px;margin-top:30px;display:none;}
+  .emi-results.show{display:block;}
+  .emi-results h3{font-size:18px;color:var(--white);margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid var(--cyan);font-family:"Raleway",sans-serif;}
+  .emi-result-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,212,212,.1);font-size:14px;font-family:"Noto Sans Tamil",sans-serif;}
+  .emi-result-row:last-child{border-bottom:none;}
+  .emi-result-label{color:var(--text-body);font-weight:500;}
+  .emi-result-value{color:var(--cyan);font-weight:700;text-align:right;}
+  .emi-highlight{background:rgba(0,212,212,.12);padding:15px;border-radius:8px;margin:15px 0;border:1px solid rgba(0,212,212,.2);}
+  .emi-highlight .emi-result-row{border-bottom:none;padding:8px 0;}
+  .emi-emi-amount{font-size:18px !important;}
+  @media(max-width:768px){.fsp-emi-box{padding:30px 24px;}.emi-row{grid-template-columns:1fr;gap:15px;}}
 </style>
+
+<div id="fspEmiOverlay" class="fsp-emi-overlay" role="dialog" aria-modal="true" aria-labelledby="fspEmiTitle">
+  <div class="fsp-emi-box">
+    <button class="fsp-emi-close" id="fspEmiClose" aria-label="மூடு / Close">&times;</button>
+    <div class="section-head center" style="margin-bottom:24px">
+      <div class="section-label">Easy EMI</div>
+      <h2 class="section-title" id="fspEmiTitle" style="font-size:clamp(22px,3vw,30px)">Premium-ஐ EMI-ல் தொகை செய்யுங்கள்</h2>
+      <p class="section-desc">உங்கள் premium amount, duration, tenure உள்ளிட்டு monthly EMI calculate பண்ணுங்க</p>
+    </div>
+
+    <div class="fsp-emi-container">
+      <form id="emiForm">
+        <div class="emi-form-group">
+          <label>Premium Amount <span class="emi-required">*</span></label>
+          <input type="number" id="premiumAmount" placeholder="₹ உள்ளிடவும்" min="1000" required>
+        </div>
+
+        <div class="emi-row">
+          <div class="emi-form-group">
+            <label>Duration (years) <span class="emi-required">*</span></label>
+            <select id="duration" required onchange="updateTenureOptions()">
+              <option value="">Select Duration</option>
+              <option value="1">1 Year</option>
+              <option value="3">3 Years</option>
+            </select>
+          </div>
+
+          <div class="emi-form-group">
+            <label>Tenure (months) <span class="emi-required">*</span></label>
+            <select id="tenure" required>
+              <option value="">Select Tenure</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="emi-form-group">
+          <label>Upfront <span class="emi-required">*</span></label>
+          <select id="upfront" required>
+            <option value="">Select Upfront %</option>
+          </select>
+        </div>
+
+        <button type="button" class="emi-btn" onclick="calculateEMI()">Calculate EMI</button>
+      </form>
+
+      <div class="emi-note">
+        <strong>NOTE:</strong> This is just a calculator based on premium amount, tenure and upfront amount. An exact quote will be available only after providing full customer details.
+      </div>
+
+      <div class="emi-results" id="results">
+        <h3>Approximate Quote</h3>
+        
+        <div class="emi-result-row">
+          <span class="emi-result-label">Upfront Amount (Inc. PF):</span>
+          <span class="emi-result-value" id="resultUpfront">₹0.00</span>
+        </div>
+
+        <div class="emi-highlight">
+          <div class="emi-result-row">
+            <span class="emi-result-label emi-emi-amount">EMI Amount:</span>
+            <span class="emi-result-value emi-emi-amount" id="resultEMI">₹0.00</span>
+          </div>
+        </div>
+
+        <div class="emi-result-row">
+          <span class="emi-result-label">Loan Amount:</span>
+          <span class="emi-result-value" id="resultLoan">₹0.00</span>
+        </div>
+
+        <div class="emi-result-row">
+          <span class="emi-result-label">Interest Rate (Flat):</span>
+          <span class="emi-result-value" id="resultRate">11.7%</span>
+        </div>
+
+        <div class="emi-result-row">
+          <span class="emi-result-label">Processing Fee:</span>
+          <span class="emi-result-value">₹943</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="fspQuoteOverlay" class="fsp-q-overlay" role="dialog" aria-modal="true" aria-labelledby="fspQuoteHeading">
   <div class="fsp-q-modal">
@@ -502,6 +614,21 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeQ(); });
   window.addEventListener('hashchange', function(){ if(location.hash==='#quote') openQ(); });
   if(location.hash==='#quote') openQ();   // /#quote link நேரடியா திறக்கும்
+
+  // EMI Calculator Modal
+  var emiOv = document.getElementById('fspEmiOverlay');
+  if(emiOv) {
+    var emiCloseBtn = document.getElementById('fspEmiClose');
+    function openEmi(e){ if(e) e.preventDefault(); emiOv.classList.add('fsp-open'); document.body.style.overflow='hidden'; }
+    function closeEmi(){ emiOv.classList.remove('fsp-open'); document.body.style.overflow=''; if(location.hash==='#emi'){ history.replaceState(null,'',location.pathname); } }
+    
+    document.querySelectorAll('[data-open-emi], a[href="#emi"]').forEach(function(el){ el.addEventListener('click', openEmi); });
+    if(emiCloseBtn) emiCloseBtn.addEventListener('click', closeEmi);
+    emiOv.addEventListener('click', function(e){ if(e.target===emiOv) closeEmi(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeEmi(); });
+    window.addEventListener('hashchange', function(){ if(location.hash==='#emi') openEmi(); });
+    if(location.hash==='#emi') openEmi();
+  }
 })();
 </script>
 
@@ -695,13 +822,13 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   </div>
   <div class="fsp-shorts-row">
     <div class="fsp-short-wrap reveal">
-      <iframe src="https://www.youtube.com/embed/Cc_DA-kWSC8" title="FSP Short 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0" title="FSP Short 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
     <div class="fsp-short-wrap reveal">
-      <iframe src="https://www.youtube.com/embed/HU-4cfLdeZY" title="FSP Short 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0" title="FSP Short 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
     <div class="fsp-short-wrap reveal">
-      <iframe src="https://www.youtube.com/embed/ob0yk3njnHo" title="FSP Short 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0" title="FSP Short 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -957,6 +1084,9 @@ if(window.location.hash === "#thankyou") {
 </script>
 <!-- ===== End Form Validation ===== -->
 
+<!-- ===== EMI Calculator Modal ===== -->
+<section id="emi-modal-section"></section>
+
 <!-- ===== FSP Privacy Policy Modal ===== -->
 <div id="fspPrivacyOverlay" class="fsp-pp-overlay" role="dialog" aria-modal="true" aria-labelledby="fspPrivacyTitle">
   <div class="fsp-pp-box">
@@ -1061,6 +1191,162 @@ if(window.location.hash === "#thankyou") {
   .fsp-short-wrap iframe{
     position:absolute; top:0; left:0; width:100%; height:100%; border:0;
   }
+  /* ===== EMI Calculator Styles ===== */
+  #emi-calculator{
+    background:linear-gradient(180deg,#081e1e 0%,var(--dark) 100%);
+  }
+  .emi-container{
+    max-width:700px;
+    margin:0 auto;
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:40px 35px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .emi-title{
+    font-family:"Raleway",sans-serif;
+    font-size:32px;
+    font-weight:800;
+    color:var(--white);
+    margin-bottom:30px;
+    text-align:center;
+  }
+  .emi-form-group{
+    margin-bottom:24px;
+  }
+  .emi-form-group label{
+    display:block;
+    font-size:14px;
+    font-weight:700;
+    color:var(--white);
+    margin-bottom:8px;
+    font-family:"Noto Sans Tamil",sans-serif;
+  }
+  .emi-required{
+    color:#ff6b6b;
+  }
+  .emi-form-group input,
+  .emi-form-group select{
+    width:100%;
+    padding:12px 15px;
+    border:1px solid var(--card-border);
+    border-radius:8px;
+    font-size:15px;
+    background:rgba(11,42,42,0.5);
+    color:var(--white);
+    font-family:inherit;
+    transition:border-color .3s;
+  }
+  .emi-form-group input::placeholder{
+    color:rgba(200,232,232,.5);
+  }
+  .emi-form-group input:focus,
+  .emi-form-group select:focus{
+    outline:none;
+    border-color:var(--cyan);
+    background:rgba(11,42,42,0.8);
+  }
+  .emi-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .emi-btn{
+    width:100%;
+    padding:14px;
+    background:linear-gradient(135deg,var(--cyan),#00a8a8);
+    color:var(--dark);
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    letter-spacing:.5px;
+    transition:all .3s;
+    margin-top:10px;
+    box-shadow:0 4px 15px rgba(0,212,212,.3);
+  }
+  .emi-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 24px rgba(0,212,212,.45);
+  }
+  .emi-note{
+    background:rgba(0,212,212,.08);
+    border-left:4px solid var(--cyan);
+    padding:15px;
+    border-radius:6px;
+    margin:25px 0;
+    font-size:13px;
+    color:var(--text-body);
+    line-height:1.7;
+    font-family:"Noto Sans Tamil",sans-serif;
+  }
+  .emi-results{
+    background:rgba(11,42,42,.6);
+    border:1px solid rgba(0,212,212,.2);
+    border-radius:12px;
+    padding:25px;
+    margin-top:30px;
+    display:none;
+  }
+  .emi-results.show{
+    display:block;
+  }
+  .emi-results h3{
+    font-size:18px;
+    color:var(--white);
+    margin-bottom:18px;
+    padding-bottom:12px;
+    border-bottom:2px solid var(--cyan);
+    font-family:"Raleway",sans-serif;
+  }
+  .emi-result-row{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid rgba(0,212,212,.1);
+    font-size:14px;
+    font-family:"Noto Sans Tamil",sans-serif;
+  }
+  .emi-result-row:last-child{
+    border-bottom:none;
+  }
+  .emi-result-label{
+    color:var(--text-body);
+    font-weight:500;
+  }
+  .emi-result-value{
+    color:var(--cyan);
+    font-weight:700;
+    text-align:right;
+  }
+  .emi-highlight{
+    background:rgba(0,212,212,.12);
+    padding:15px;
+    border-radius:8px;
+    margin:15px 0;
+    border:1px solid rgba(0,212,212,.2);
+  }
+  .emi-highlight .emi-result-row{
+    border-bottom:none;
+    padding:8px 0;
+  }
+  .emi-emi-amount{
+    font-size:18px !important;
+  }
+  @media(max-width:768px){
+    .emi-container{
+      padding:30px 24px;
+    }
+    .emi-title{
+      font-size:26px;
+    }
+    .emi-row{
+      grid-template-columns:1fr;
+      gap:15px;
+    }
+  }
 </style>
 
 <script>
@@ -1084,5 +1370,104 @@ if(window.location.hash === "#thankyou") {
 })();
 </script>
 <!-- ===== End Privacy Policy Modal ===== -->
+
+<!-- ===== EMI Calculator Script ===== -->
+<script>
+(function(){
+  const TENURE_OPTIONS = {
+    1: [3, 6, 9],
+    3: [6, 9, 12, 24]
+  };
+
+  const UPFRONT_OPTIONS = {
+    1: [15, 20, 25, 30],
+    3: [5, 10, 15, 20, 25, 30]
+  };
+
+  const INTEREST_RATE = 11.7;
+  const PROCESSING_FEE = 943;
+
+  window.updateTenureOptions = function() {
+    const duration = document.getElementById('duration').value;
+    const tenureSelect = document.getElementById('tenure');
+    const upfrontSelect = document.getElementById('upfront');
+
+    tenureSelect.innerHTML = '<option value="">Select Tenure</option>';
+    upfrontSelect.innerHTML = '<option value="">Select Upfront %</option>';
+
+    if (duration) {
+      const tenures = TENURE_OPTIONS[duration] || [];
+      tenures.forEach(month => {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month + ' Months';
+        tenureSelect.appendChild(option);
+      });
+
+      const upfronts = UPFRONT_OPTIONS[duration] || [];
+      upfronts.forEach(percent => {
+        const option = document.createElement('option');
+        option.value = percent;
+        option.textContent = percent + '%';
+        upfrontSelect.appendChild(option);
+      });
+    }
+  };
+
+  window.calculateEMI = function() {
+    const premium = parseFloat(document.getElementById('premiumAmount').value);
+    const duration = parseInt(document.getElementById('duration').value);
+    const tenure = parseInt(document.getElementById('tenure').value);
+    const upfrontPercent = parseFloat(document.getElementById('upfront').value);
+
+    if (!premium || !duration || !tenure || upfrontPercent === '') {
+      alert('Please fill all fields');
+      return;
+    }
+
+    // Calculate upfront amount (with processing fee)
+    const upfrontAmount = (premium * upfrontPercent / 100) + PROCESSING_FEE;
+
+    // Calculate loan amount (premium minus upfront percentage)
+    const loanAmount = premium - (premium * upfrontPercent / 100);
+
+    // Calculate years from tenure
+    const years = tenure / 12;
+
+    // Calculate flat interest
+    const interest = (loanAmount * INTEREST_RATE * years) / 100;
+
+    // Total repayable
+    const totalRepayable = loanAmount + interest;
+
+    // EMI
+    const emi = totalRepayable / tenure;
+
+    // Display results
+    document.getElementById('resultUpfront').textContent = '₹' + upfrontAmount.toFixed(2);
+    document.getElementById('resultEMI').textContent = '₹' + emi.toFixed(2);
+    document.getElementById('resultLoan').textContent = '₹' + loanAmount.toFixed(2);
+
+    document.getElementById('results').classList.add('show');
+
+    // Track with Meta Pixel if available
+    if (typeof trackLead === 'function') {
+      trackLead();
+    }
+  };
+
+  // Allow Enter key to calculate
+  var form = document.getElementById('emiForm');
+  if(form) {
+    form.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        calculateEMI();
+      }
+    });
+  }
+})();
+</script>
+<!-- ===== End EMI Calculator Script ===== -->
 </body>
 </html>
