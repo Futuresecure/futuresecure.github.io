@@ -51,6 +51,9 @@
       document.getElementById("fspPhone");
 
     if (!nameEl || !phoneEl) {
+      console.error(
+        "Website form fields not found"
+      );
       return;
     }
 
@@ -64,6 +67,9 @@
       fullName.length < 2 ||
       !/^[6-9]\d{9}$/.test(mobile)
     ) {
+      console.log(
+        "Invalid name or mobile number"
+      );
       return;
     }
 
@@ -146,10 +152,10 @@
         "Duplicate check failed:",
         existing.error.message
       );
-
       return;
     }
 
+    // Duplicate lead found
     if (
       existing.data &&
       existing.data.length
@@ -157,7 +163,6 @@
       console.log(
         "Duplicate website lead skipped"
       );
-
       return;
     }
 
@@ -173,7 +178,7 @@
             mobile_number:
               mobile,
 
-            // Keep pincode in City column
+            // Pincode remains in City column
             city:
               pincode
                 ? "Pincode: " + pincode
@@ -200,81 +205,99 @@
         "Website lead save failed:",
         insert.error.message
       );
-
       return;
     }
 
     if (
-      insert.data &&
-      insert.data.id
+      !insert.data ||
+      !insert.data.id
     ) {
-      var leadId =
-        insert.data.id;
+      console.error(
+        "Lead created but ID not returned"
+      );
+      return;
+    }
 
-      // Create activity history
-      var activityResult =
-        await client
-          .from("lead_activities")
-          .insert([
-            {
-              lead_id:
-                leadId,
+    var leadId =
+      insert.data.id;
 
-              activity_type:
-                "Lead Created",
+    console.log(
+      "Website lead created:",
+      leadId
+    );
 
-              description:
-                "Lead created automatically from Website Quote Form."
-            }
-          ]);
+    // Create Lead Activity History
+    var activityResult =
+      await client
+        .from("lead_activities")
+        .insert([
+          {
+            lead_id:
+              leadId,
 
-      if (activityResult.error) {
-        console.error(
-          "Activity creation failed:",
-          activityResult.error.message
-        );
-      }
+            activity_type:
+              "Lead Created",
 
-      // Create automatic follow-up task
-      var taskResult =
-        await client
-          .from("tasks")
-          .insert([
-            {
-              title:
-                "Contact new website lead",
+            description:
+              "Lead created automatically from Website Quote Form."
+          }
+        ]);
 
-              description:
-                "New website lead: " +
-                fullName +
-                " | Mobile: " +
-                mobile,
+    if (activityResult.error) {
+      console.error(
+        "Activity creation failed:",
+        activityResult.error.message
+      );
+    } else {
+      console.log(
+        "Lead activity created successfully"
+      );
+    }
 
-              due_at:
-                new Date().toISOString(),
+    // Create Automatic Follow-up Task
+    // Task is linked to this specific lead
+    var taskResult =
+      await client
+        .from("tasks")
+        .insert([
+          {
+            title:
+              "Contact new website lead",
 
-              status:
-                "Pending"
-            }
-          ]);
+            description:
+              "New website lead: " +
+              fullName +
+              " | Mobile: " +
+              mobile,
 
-      if (taskResult.error) {
-        console.error(
-          "Auto task creation failed:",
-          taskResult.error.message
-        );
-      } else {
-        console.log(
-          "Auto follow-up task created successfully"
-        );
-      }
+            lead_id:
+              leadId,
+
+            due_at:
+              new Date().toISOString(),
+
+            status:
+              "Pending"
+          }
+        ]);
+
+    if (taskResult.error) {
+      console.error(
+        "Auto task creation failed:",
+        taskResult.error.message
+      );
+    } else {
+      console.log(
+        "Auto follow-up task created successfully"
+      );
     }
 
     console.log(
-      "Website lead saved successfully"
+      "Website lead + activity + task saved successfully"
     );
   }
 
+  // Listen for Website Quote Form submit button
   document.addEventListener(
     "click",
     function (event) {
