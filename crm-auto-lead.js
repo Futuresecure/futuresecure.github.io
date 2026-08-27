@@ -9,6 +9,7 @@
 
     return new Promise(function (resolve, reject) {
       var script = document.createElement("script");
+
       script.src =
         "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
 
@@ -25,11 +26,17 @@
   function cleanMobile(value) {
     var mobile = String(value || "").replace(/\D/g, "");
 
-    if (mobile.length === 12 && mobile.indexOf("91") === 0) {
+    if (
+      mobile.length === 12 &&
+      mobile.indexOf("91") === 0
+    ) {
       mobile = mobile.slice(2);
     }
 
-    if (mobile.length === 11 && mobile.charAt(0) === "0") {
+    if (
+      mobile.length === 11 &&
+      mobile.charAt(0) === "0"
+    ) {
       mobile = mobile.slice(1);
     }
 
@@ -37,15 +44,21 @@
   }
 
   async function saveWebsiteLead() {
-    var nameEl = document.getElementById("fspName");
-    var phoneEl = document.getElementById("fspPhone");
+    var nameEl =
+      document.getElementById("fspName");
+
+    var phoneEl =
+      document.getElementById("fspPhone");
 
     if (!nameEl || !phoneEl) {
       return;
     }
 
-    var fullName = nameEl.value.trim();
-    var mobile = cleanMobile(phoneEl.value);
+    var fullName =
+      nameEl.value.trim();
+
+    var mobile =
+      cleanMobile(phoneEl.value);
 
     if (
       fullName.length < 2 ||
@@ -58,12 +71,16 @@
       document.getElementById("fspPincode");
 
     var pincode =
-      pincodeEl ? pincodeEl.value.trim() : "";
+      pincodeEl
+        ? pincodeEl.value.trim()
+        : "";
 
     var members = [];
 
     document
-      .querySelectorAll("#fspAges .fsp-age")
+      .querySelectorAll(
+        "#fspAges .fsp-age"
+      )
       .forEach(function (item) {
         members.push(
           item.getAttribute("data-label") +
@@ -85,10 +102,17 @@
 
     var notes = [
       "Website Quote Form",
+
       "Members: " +
-        (members.join(", ") || "-"),
+        (
+          members.join(", ") || "-"
+        ),
+
       "Pincode: " +
-        (pincode || "-"),
+        (
+          pincode || "-"
+        ),
+
       "Medical: " +
         (
           medical.length
@@ -97,7 +121,8 @@
         )
     ].join("\n");
 
-    var supabase = await getSupabase();
+    var supabase =
+      await getSupabase();
 
     var client =
       supabase.createClient(
@@ -105,11 +130,15 @@
         SUPABASE_KEY
       );
 
+    // Check duplicate mobile number
     var existing =
       await client
         .from("leads")
         .select("id")
-        .eq("mobile_number", mobile)
+        .eq(
+          "mobile_number",
+          mobile
+        )
         .limit(1);
 
     if (existing.error) {
@@ -132,20 +161,35 @@
       return;
     }
 
+    // Create new lead
     var insert =
       await client
         .from("leads")
         .insert([
           {
-            full_name: fullName,
-            mobile_number: mobile,
-            city: pincode
-              ? "Pincode: " + pincode
-              : null,
-            lead_source: "Website",
-            status: "New",
-            next_follow_up: null,
-            notes: notes
+            full_name:
+              fullName,
+
+            mobile_number:
+              mobile,
+
+            // Keep pincode in City column
+            city:
+              pincode
+                ? "Pincode: " + pincode
+                : null,
+
+            lead_source:
+              "Website",
+
+            status:
+              "New",
+
+            next_follow_up:
+              null,
+
+            notes:
+              notes
           }
         ])
         .select()
@@ -164,16 +208,66 @@
       insert.data &&
       insert.data.id
     ) {
-      await client
-        .from("lead_activities")
-        .insert([
-          {
-            lead_id: insert.data.id,
-            activity_type: "Lead Created",
-            description:
-              "Lead created automatically from Website Quote Form."
-          }
-        ]);
+      var leadId =
+        insert.data.id;
+
+      // Create activity history
+      var activityResult =
+        await client
+          .from("lead_activities")
+          .insert([
+            {
+              lead_id:
+                leadId,
+
+              activity_type:
+                "Lead Created",
+
+              description:
+                "Lead created automatically from Website Quote Form."
+            }
+          ]);
+
+      if (activityResult.error) {
+        console.error(
+          "Activity creation failed:",
+          activityResult.error.message
+        );
+      }
+
+      // Create automatic follow-up task
+      var taskResult =
+        await client
+          .from("tasks")
+          .insert([
+            {
+              title:
+                "Contact new website lead",
+
+              description:
+                "New website lead: " +
+                fullName +
+                " | Mobile: " +
+                mobile,
+
+              due_at:
+                new Date().toISOString(),
+
+              status:
+                "Pending"
+            }
+          ]);
+
+      if (taskResult.error) {
+        console.error(
+          "Auto task creation failed:",
+          taskResult.error.message
+        );
+      } else {
+        console.log(
+          "Auto follow-up task created successfully"
+        );
+      }
     }
 
     console.log(
