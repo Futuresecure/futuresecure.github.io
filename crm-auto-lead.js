@@ -166,6 +166,11 @@
       return;
     }
 
+    // Detect lead source from URL parameter
+    var urlParams = new URLSearchParams(window.location.search);
+    var sourceParam = urlParams.get("source");
+    var leadSource = sourceParam === "MetaAds" ? "Meta Ads" : "Website";
+
     // Create new lead
     var insert =
       await client
@@ -185,7 +190,7 @@
                 : null,
 
             lead_source:
-              "Website",
+              leadSource,
 
             status:
               "New",
