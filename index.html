@@ -390,14 +390,22 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
       <div class="form-group"><label>பெயர்</label><input type="text" id="fspName" placeholder="உங்கள் பெயர்"></div>
       <div class="form-group"><label>மொபைல்</label><input type="tel" id="fspPhone" placeholder="+91 XXXXX XXXXX"></div>
       <div class="fsp-q-err" id="fspErr5"></div>
-      <div class="fsp-q-nav"><button type="button" class="fsp-q-back" data-back="4">‹ பின்</button><button type="button" class="fsp-q-submit" id="fspQSubmit">WhatsApp-ல் Quote பெறுங்கள்</button></div>
+      <div class="fsp-q-nav"><button type="button" class="fsp-q-back" data-back="4">‹ பின்</button><button type="button" class="fsp-q-submit" id="fspQSubmit">Submit</button></div>
     </div>
 
     <div class="fsp-qstep" data-step="done">
       <div class="fsp-q-done">
         <div class="fsp-q-done-ic">✅</div>
-        <h3>நன்றி!</h3>
-        <p>உங்கள் விவரம் பெறப்பட்டது. WhatsApp திறக்கிறது — அங்கு <strong>Send</strong> அழுத்தினால் உடனே உங்களைத் தொடர்பு கொள்கிறோம்.</p>
+        <h3>நன்றி! 🎉</h3>
+        <p>உங்கள் விவரங்கள் வெற்றிகரமாக பதிவு செய்யப்பட்டுள்ளது.</p>
+        <div class="fsp-q-details" style="margin-top:20px; text-align:left; background:#f5f5f5; padding:15px; border-radius:8px; font-size:14px;">
+          <div style="margin:8px 0;"><strong>பெயர்:</strong> <span id="qDetailName">-</span></div>
+          <div style="margin:8px 0;"><strong>மொபைல்:</strong> <span id="qDetailMobile">-</span></div>
+          <div style="margin:8px 0;"><strong>பின்கோடு:</strong> <span id="qDetailPincode">-</span></div>
+          <div style="margin:8px 0;"><strong>குடும்ப உறுப்பினர்கள்:</strong> <span id="qDetailMembers">-</span></div>
+          <div style="margin:8px 0;"><strong>மருத்துவ தகவல்:</strong> <span id="qDetailMedical">-</span></div>
+        </div>
+        <p style="margin-top:20px; font-size:14px;">எங்கள் ஆலோசகர் விரைவில் உங்களைத் தொடர்புகொள்வார்.</p>
       </div>
     </div>
   </div>
@@ -606,15 +614,12 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
       }catch(err){}
     }
 
-    // 2) WhatsApp திற
-    var msg='வணக்கம்! 🙏 எனக்கு Health Insurance quote வேண்டும்.\n\n'+
-            '👨‍👩‍👧 உறுப்பினர்கள்: '+membersStr+'\n'+
-            '📍 Pincode: '+(pincode||'-')+'\n'+
-            '🩺 உடல்நலம்: '+medStr+'\n'+
-            '🧑 பெயர்: '+name+'\n'+
-            '📞 மொபைல்: '+phone;
-    if(us) msg+='\n(Ref: '+us+(uc?' / '+uc:'')+')';
-    window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
+    // 2) Display customer details on Thank You screen
+    document.getElementById('qDetailName').textContent=name;
+    document.getElementById('qDetailMobile').textContent='+91 '+d;
+    document.getElementById('qDetailPincode').textContent=pincode||'-';
+    document.getElementById('qDetailMembers').textContent=membersStr||'-';
+    document.getElementById('qDetailMedical').textContent=medStr;
 
     show('done');
   });
