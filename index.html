@@ -220,7 +220,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
     <div class="service-card reveal"><div class="svc-num">05</div><div class="svc-icon">📋</div><div class="svc-title">Claim Guidance &amp; Assistance</div><div class="svc-desc">Claim process முழுவதும் step-by-step உதவி. Documents முதல் settlement வரை நாங்கள் உங்களுடன் நிற்கிறோம்.</div></div>
     <div class="service-card reveal"><div class="svc-num">06</div><div class="svc-icon">🔄</div><div class="svc-title">Policy Renewal Support</div><div class="svc-desc">Policy expiry நினைவூட்டல், coverage review மற்றும் தேவைக்கு ஏற்ப plan மாற்றம். Renewal நேரத்தில் எந்த குழப்பமும் இல்லை.</div></div>
   </div>
-  <div style="max-width:1100px;margin:48px auto 0;padding:0 20px;text-align:center;border-top:1px solid var(--card-border);padding-top:48px;">
+  <div id="fspApptPromoSection" style="max-width:1100px;margin:48px auto 0;padding:0 20px;text-align:center;border-top:1px solid var(--card-border);padding-top:48px;">
     <h3 style="font-family:'Noto Sans Tamil',sans-serif;font-size:18px;color:var(--white);margin:0 0 8px;">📅 உங்கள் Appointment-ஐ Book பண்ணுங்கள்</h3>
     <p style="font-family:'Noto Sans Tamil',sans-serif;font-size:13px;color:rgba(200,232,232,.7);margin:0 0 16px;">நேரடியா உங்கள் convenient நேரத்தில் appointment schedule பண்ணுங்கள்</p>
     <a href="#appointment" class="btn-appointment" data-open-appointment onclick="trackSchedule()">📅 Appointment Book →</a>
@@ -272,7 +272,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   .btn-appointment:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,168,168,.45);}
   .btn-emi{background:linear-gradient(135deg,#9c27b0,#7b1fa2);color:#fff;font-weight:800;font-size:14px;padding:14px 32px;border-radius:4px;border:none;letter-spacing:.5px;transition:all .3s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(156,39,176,.3);cursor:pointer;font-family:"Noto Sans Tamil",sans-serif;}
   .btn-emi:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(156,39,176,.45);}
-  .fsp-appt-overlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(4,20,20,.95);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
+  .fsp-appt-overlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(4,20,20,.85);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
   .fsp-appt-overlay.fsp-open{display:flex;}
   .fsp-appt-modal{position:relative;width:100%;max-width:640px;background:var(--mid);border:1px solid var(--card-border);border-radius:16px;padding:36px 26px 30px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
   .fsp-appt-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:30px;line-height:1;color:var(--text-body);cursor:pointer;z-index:2;}
@@ -710,8 +710,48 @@ var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxha15SmPzC55PdXKtZ1YzHvp-anEAzabPlIPHJzV_OhXa8yiKjo6dupvojYtKDr8q6PA/exec';
   var WA_NUMBER = '919363705905';
   
-  function openAppt(e){ if(e) e.preventDefault(); ov.classList.add('fsp-open'); document.body.style.overflow='hidden'; buildTimeSlots(); }
-  function closeAppt(){ ov.classList.remove('fsp-open'); document.body.style.overflow=''; if(location.hash==='#appointment'){ history.replaceState(null,'',location.pathname); } }
+  // Reset form display when modal reopens (after successful booking)
+  function resetApptForm(){
+    // Show header and subtitle
+    document.getElementById('fspApptTitle').style.display = '';
+    var subtitleEl = document.querySelector('.fsp-appt-sub');
+    if(subtitleEl) subtitleEl.style.display = '';
+    
+    // Show form grid and navigation
+    if(dateInput.parentNode.parentNode) dateInput.parentNode.parentNode.style.display = '';
+    if(submitBtn.parentNode) submitBtn.parentNode.style.display = '';
+    
+    // Hide success message
+    if(doneDiv) doneDiv.style.display = 'none';
+    
+    // Clear error message
+    if(errDiv) errDiv.textContent = '';
+    
+    // Re-enable submit button
+    if(submitBtn) submitBtn.disabled = false;
+    
+    // FIX 1: Hide promotional appointment section to prevent background visibility
+    var promoSection = document.getElementById('fspApptPromoSection');
+    if(promoSection) promoSection.style.display = 'none';
+  }
+  
+  // CRITICAL FIX: openAppt() function was missing but referenced
+  function openAppt(e){ 
+    if(e) e.preventDefault(); 
+    ov.classList.add('fsp-open'); 
+    document.body.style.overflow='hidden'; 
+    buildTimeSlots(); 
+    resetApptForm(); 
+  }
+  
+  function closeAppt(){ 
+    ov.classList.remove('fsp-open'); 
+    document.body.style.overflow=''; 
+    if(location.hash==='#appointment'){ history.replaceState(null,'',location.pathname); } 
+    // Show promotional section again when modal closes
+    var promoSection = document.getElementById('fspApptPromoSection');
+    if(promoSection) promoSection.style.display = '';
+  }
   
   // Wire open/close
   document.querySelectorAll('[data-open-appointment], a[href="#appointment"]').forEach(function(el){ el.addEventListener('click', openAppt); });
@@ -777,151 +817,122 @@ var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     // Disable button to prevent duplicate submissions
     submitBtn.disabled = true;
     
-    // FINAL: Execute parallel flow for faster Thank You screen
+    // FINAL: Execute optimized flow - Thank You screen shows immediately after RPC success
     (async function(){
-      // FIX 2: Parallelize RPC and Google Sheets instead of sequential await
-      // This reduces Thank You screen delay by ~1-2 seconds
-      
-      // Create RPC promise
-      var rpcPromise = (async function(){
-        var rpcSuccess = false;
-        var rpcError = null;
-        try {
-          var response = await supabaseClient.rpc('handle_appointment_booking', {
-            p_customer_name: name,
-            p_mobile_number: phoneVal,
-            p_appointment_date: date,
-            p_appointment_time: time,
-            p_source: 'Website Appointment'
-          });
-          
-          if(response && response.data){
-            var result = response.data;
-            if(result.success){
-              rpcSuccess = true;
-              console.log('✅ PHASE 2: Appointment saved to Supabase', result.data);
-            } else {
-              rpcError = result.error;
-              console.warn('⚠️ PHASE 2: RPC error:', rpcError);
-            }
-          } else if(response.error){
-            rpcError = response.error.message;
-            console.warn('⚠️ PHASE 2: Supabase error:', rpcError);
-          }
-        } catch(err) {
-          rpcError = err.message;
-          console.warn('⚠️ PHASE 2: RPC call failed:', rpcError);
-        }
-        return {rpcSuccess: rpcSuccess, rpcError: rpcError};
-      })();
-      
-      // Create Google Sheets promise (independent operation)
-      var sheetsPromise = (async function(){
-        var sheetsSuccess = false;
-        var sheetsError = null;
-        if(SCRIPT_URL && SCRIPT_URL.indexOf('http')===0){
-          try {
-            var sheetsResponse = await fetch(SCRIPT_URL, {
-              method:'POST',
-              mode:'no-cors',
-              headers:{'Content-Type':'application/x-www-form-urlencoded'},
-              body: new URLSearchParams({name:name, mobile:phoneVal, appt_date:date, appt_time:timeDisplay, source:'Website Appointment'}).toString()
-            });
-            sheetsSuccess = true;
-            console.log('✅ Google Sheets submission completed');
-          } catch(err) {
-            sheetsError = err.message;
-            console.warn('⚠️ Google Sheets submission failed:', sheetsError);
-          }
-        }
-        return {sheetsSuccess: sheetsSuccess, sheetsError: sheetsError};
-      })();
-      
-      // Wait for BOTH operations in parallel using Promise.all()
-      var results = await Promise.all([rpcPromise, sheetsPromise]);
-      var rpcResult = results[0];
-      var sheetsResult = results[1];
-      
-      // Extract results
-      var rpcSuccess = rpcResult.rpcSuccess;
-      var rpcError = rpcResult.rpcError;
-      var sheetsSuccess = sheetsResult.sheetsSuccess;
-      var sheetsError = sheetsResult.sheetsError;
-      
-      // Determine overall storage success (RPC is primary)
-      var storageSuccess = rpcSuccess || sheetsSuccess;
-      
-      // Step 4: Check result - FINAL IMPROVEMENT #1: Better UX for CASE C
-      if(!storageSuccess){
-        // CASE D: Both failed - show error message, NO false success
-        submitBtn.disabled = false;
-        errDiv.textContent = 'Appointment could not be saved. Please try again or contact us at +91 93637 05905.';
-        console.error('❌ CRITICAL: Both Supabase and Google Sheets failed', {rpcError: rpcError, sheetsError: sheetsError});
-        return;
+      // FIX 2: Start Google Sheets in background IMMEDIATELY (don't await it)
+      // This starts at 0ms, before RPC
+      var sheetsStarted = false;
+      if(SCRIPT_URL && SCRIPT_URL.indexOf('http')===0){
+        sheetsStarted = true;
+        // Fire Sheets in background without awaiting - starts at 0ms
+        fetch(SCRIPT_URL, {
+          method:'POST',
+          mode:'no-cors',
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body: new URLSearchParams({name:name, mobile:phoneVal, appt_date:date, appt_time:timeDisplay, source:'Website Appointment'}).toString()
+        }).then(function(){
+          console.log('✅ Google Sheets submission completed (background)');
+        }).catch(function(err){
+          console.warn('⚠️ Google Sheets submission failed (background):', err.message);
+        });
       }
       
-      // Step 5: Log warnings for partial failures
-      if(rpcError && sheetsSuccess){
-        console.warn('⚠️ WARNING: Supabase RPC failed (' + rpcError + '), but Google Sheets saved the appointment');
-      }
-      if(sheetsError && rpcSuccess){
-        console.warn('⚠️ WARNING: Google Sheets submission failed (' + sheetsError + '), but Supabase saved the appointment');
-      }
+      // PRIMARY: Await ONLY Supabase RPC - user waits for this (~1 second)
+      // RPC starts at ~0ms (after Sheets starts), completes at ~1000ms
+      var rpcSuccess = false;
+      var rpcError = null;
       
-      // Step 6: FINAL IMPROVEMENT #1 - Different messages based on RPC success
-      var successTitle = 'நன்றி!';
-      var successMsg = 'உங்கள் appointment <strong id="fspApptDateDisplay"></strong> <strong id="fspApptTimeDisplay"></strong>-க்கு confirm ஆயிட்டது. WhatsApp-ல confirmation வந்திடும்.';
-      
-      // CASE C: RPC failed but Sheets succeeded - different message
-      if(!rpcSuccess && sheetsSuccess){
-        successTitle = '🙏 நன்றி!';
-        successMsg = 'உங்கள் appointment request பெறப்பட்டுவிட்டது. நாம் விரைவில் உங்களை confirm செய்து contact பண்ணிவிடுவோம்.';
-        console.log('⚠️ CASE C: Appointment saved to Google Sheets, pending Supabase confirmation');
-      }
-      
-      // Step 7: FINAL IMPROVEMENT #2 - Try WhatsApp, but don't fail appointment if blocked
-      var whatsappOpened = false;
       try {
-        // Try to open WhatsApp
-        var waWindow = window.open(waUrl, '_blank');
-        if(waWindow){
-          whatsappOpened = true;
-          console.log('✅ WhatsApp window opened');
-        } else {
-          console.warn('⚠️ WhatsApp popup blocked by browser');
+        var response = await supabaseClient.rpc('handle_appointment_booking', {
+          p_customer_name: name,
+          p_mobile_number: phoneVal,
+          p_appointment_date: date,
+          p_appointment_time: time,
+          p_source: 'Website Appointment'
+        });
+        
+        if(response && response.data){
+          var result = response.data;
+          if(result.success){
+            rpcSuccess = true;
+            console.log('✅ PHASE 2: Appointment saved to Supabase', result.data);
+          } else {
+            rpcError = result.error;
+            console.warn('⚠️ PHASE 2: RPC error:', rpcError);
+          }
+        } else if(response.error){
+          rpcError = response.error.message;
+          console.warn('⚠️ PHASE 2: Supabase error:', rpcError);
         }
       } catch(err) {
-        console.warn('⚠️ WhatsApp open failed:', err.message);
+        rpcError = err.message;
+        console.warn('⚠️ PHASE 2: RPC call failed:', rpcError);
       }
       
-      // Step 8: Show success message (regardless of WhatsApp status)
-      document.getElementById('fspApptDateDisplay').textContent = dateDisplay;
-      document.getElementById('fspApptTimeDisplay').textContent = timeDisplay;
-      
-      // Update success box with appropriate message
-      var successBox = doneDiv.querySelector('.fsp-appt-done h3');
-      var successText = doneDiv.querySelector('.fsp-appt-done p');
-      if(successBox) successBox.textContent = successTitle;
-      if(successText) successText.innerHTML = successMsg;
-      
-      submitBtn.parentNode.style.display = 'none';
-      dateInput.parentNode.parentNode.style.display = 'none';
-      doneDiv.style.display = 'block';
-      
-      // Step 9: If WhatsApp failed, provide manual fallback
-      if(!whatsappOpened){
-        // Create fallback WhatsApp button
-        var waFallback = document.createElement('div');
-        waFallback.style.marginTop = '16px';
-        waFallback.style.padding = '12px';
-        waFallback.style.backgroundColor = 'rgba(0, 212, 212, 0.1)';
-        waFallback.style.borderRadius = '4px';
-        waFallback.style.textAlign = 'center';
-        waFallback.innerHTML = '<p style="font-size: 12px; color: rgba(200, 232, 232, 0.8); margin: 0 0 8px;">WhatsApp window blocked. Click below to open:';
-        waFallback.innerHTML += '<br><a href="' + waUrl + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 10px 16px; background: #25d366; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px;">📱 Open WhatsApp</a></p>';
+      // HAPPY PATH: RPC succeeded - show Thank You immediately (Sheets continues in background)
+      if(rpcSuccess){
+        // Display appointment details - update the existing elements, don't replace them
+        document.getElementById('fspApptDateDisplay').textContent = dateDisplay;
+        document.getElementById('fspApptTimeDisplay').textContent = timeDisplay;
         
-        doneDiv.appendChild(waFallback);
-        console.log('ℹ️ WhatsApp fallback button provided for user');
+        // Update success box heading
+        var successBox = doneDiv.querySelector('.fsp-appt-done h3');
+        if(successBox) successBox.textContent = 'நன்றி!';
+        
+        // Keep existing HTML structure - don't replace innerHTML
+        // The paragraph already has the date/time elements with correct IDs
+        // Just updated above, so they now have the correct values
+        
+        // FIX 3A: Hide header/subtitle
+        document.getElementById('fspApptTitle').style.display = 'none';
+        var subtitleEl = document.querySelector('.fsp-appt-sub');
+        if(subtitleEl) subtitleEl.style.display = 'none';
+        
+        submitBtn.parentNode.style.display = 'none';
+        dateInput.parentNode.parentNode.style.display = 'none';
+        doneDiv.style.display = 'block';
+        
+        // Try to open WhatsApp
+        var whatsappOpened = false;
+        try {
+          var waWindow = window.open(waUrl, '_blank');
+          if(waWindow){
+            whatsappOpened = true;
+            console.log('✅ WhatsApp window opened');
+          } else {
+            console.warn('⚠️ WhatsApp popup blocked by browser');
+          }
+        } catch(err) {
+          console.warn('⚠️ WhatsApp open failed:', err.message);
+        }
+        
+        // Provide WhatsApp fallback if blocked
+        if(!whatsappOpened){
+          var waFallback = document.createElement('div');
+          waFallback.style.marginTop = '16px';
+          waFallback.style.padding = '12px';
+          waFallback.style.backgroundColor = 'rgba(0, 212, 212, 0.1)';
+          waFallback.style.borderRadius = '4px';
+          waFallback.style.textAlign = 'center';
+          waFallback.innerHTML = '<p style="font-size: 12px; color: rgba(200, 232, 232, 0.8); margin: 0 0 8px;">WhatsApp window blocked. Click below to open:';
+          waFallback.innerHTML += '<br><a href="' + waUrl + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 10px 16px; background: #25d366; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px;">📱 Open WhatsApp</a></p>';
+          doneDiv.appendChild(waFallback);
+          console.log('ℹ️ WhatsApp fallback button provided for user');
+        }
+        
+        return;  // Exit - Thank You screen shown, Sheets continues in background
+      }
+      
+      // ERROR PATH: RPC failed - Sheets may be running, but we can't know result
+      // Don't assume success - use neutral pending message
+      
+      // RPC is the primary operation - if it failed, appointment not in database
+      // Show neutral pending message instead of claiming success
+      if(!rpcSuccess){
+        submitBtn.disabled = false;
+        errDiv.textContent = 'உங்கள் appointment request பதிவு செய்யப்படுகிறது. நாங்கள் விரைவில் confirm செய்கிறோம்.';
+        console.warn('⚠️ RPC failed - showing pending message, Sheets may be processing');
+        return;
       }
     })();
   });
