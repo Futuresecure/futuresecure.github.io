@@ -678,7 +678,7 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
         <div class="fsp-appt-done">
           <div class="fsp-appt-done-ic">✅</div>
           <h3>நன்றி!</h3>
-          <p>உங்கள் appointment <strong id="fspApptDateDisplay"></strong> <strong id="fspApptTimeDisplay"></strong>-க்கு confirm ஆயிட்டது. WhatsApp-ல confirmation வந்திடும்.</p>
+          <p>உங்கள் Appointment பதிவு செய்யப்பட்டுள்ளது. விரைவில் நாங்கள் உங்களை தொடர்புகொள்வோம்.</p>
         </div>
       </div>
     </div>
@@ -809,11 +809,6 @@ var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     var hour12 = hour>12 ? hour-12 : (hour===0 ? 12 : hour);
     var timeDisplay = ('0'+hour12).slice(-2) + ':' + minute + ' ' + ampm;
     
-    // Prepare WhatsApp message and URL
-    var waMsg = 'வணக்கம்! \n\n'+dateDisplay+' - '+timeDisplay+'-க்கு appointment confirm பண்ணிக்கலாம்.\n\nHealth Insurance பற்றி discuss பண்ண வேண்டும்.\n\nநன்றி! 🙏';
-    var waUrl = 'https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(waMsg);
-    var waDeepLink = 'whatsapp://send?phone='+WA_NUMBER+'&text='+encodeURIComponent(waMsg);
-    
     // Disable button to prevent duplicate submissions
     submitBtn.disabled = true;
     
@@ -891,34 +886,6 @@ var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         submitBtn.parentNode.style.display = 'none';
         dateInput.parentNode.parentNode.style.display = 'none';
         doneDiv.style.display = 'block';
-        
-        // Try to open WhatsApp
-        var whatsappOpened = false;
-        try {
-          var waWindow = window.open(waUrl, '_blank');
-          if(waWindow){
-            whatsappOpened = true;
-            console.log('✅ WhatsApp window opened');
-          } else {
-            console.warn('⚠️ WhatsApp popup blocked by browser');
-          }
-        } catch(err) {
-          console.warn('⚠️ WhatsApp open failed:', err.message);
-        }
-        
-        // Provide WhatsApp fallback if blocked
-        if(!whatsappOpened){
-          var waFallback = document.createElement('div');
-          waFallback.style.marginTop = '16px';
-          waFallback.style.padding = '12px';
-          waFallback.style.backgroundColor = 'rgba(0, 212, 212, 0.1)';
-          waFallback.style.borderRadius = '4px';
-          waFallback.style.textAlign = 'center';
-          waFallback.innerHTML = '<p style="font-size: 12px; color: rgba(200, 232, 232, 0.8); margin: 0 0 8px;">WhatsApp window blocked. Click below to open:';
-          waFallback.innerHTML += '<br><a href="' + waUrl + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 10px 16px; background: #25d366; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px;">📱 Open WhatsApp</a></p>';
-          doneDiv.appendChild(waFallback);
-          console.log('ℹ️ WhatsApp fallback button provided for user');
-        }
         
         return;  // Exit - Thank You screen shown, Sheets continues in background
       }
