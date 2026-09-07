@@ -585,7 +585,10 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
   });
 
   // Final submit → Sheet + WhatsApp
-  document.getElementById('fspQSubmit').addEventListener('click', function(){
+  document.getElementById('fspQSubmit').addEventListener('click', async function(){
+    var submitBtn = document.getElementById('fspQSubmit');
+    var errDiv = document.getElementById('fspErr5');
+    
     var name=document.getElementById('fspName').value.trim();
     var d=document.getElementById('fspPhone').value.replace(/\D/g,'');
     if(d.length===12&&d.indexOf('91')===0) d=d.slice(2);
@@ -602,21 +605,52 @@ footer{background:#061414;border-top:1px solid var(--card-border);padding:48px 5
     var medStr=med.length?med.join(', '):'இல்லை';
     var us=sessionStorage.getItem('fsp_utm_source')||'', uc=sessionStorage.getItem('fsp_utm_campaign')||'';
 
-    // 1) Google Sheet-க்கு அமைதியா அனுப்பு
+    // Disable button to prevent double-submit
+    submitBtn.disabled = true;
+    var originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Processing...';
+
+    // 1) Google Sheet-க்கு அமைதியா அனுப்பு (fire and forget - unchanged)
     if(SCRIPT_URL && SCRIPT_URL.indexOf('http')===0){
       try{
         fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},
           body:new URLSearchParams({name:name,mobile:d,pincode:pincode,members:membersStr,medical:medStr,utm_source:us,utm_campaign:uc,source:'Website Quote Form'}).toString()});
-      }catch(err){}
+      }catch(err){ console.warn('Google Sheets submission failed:', err.message); }
     }
 
-    // 2) Display customer details on Thank You screen
-    document.getElementById('qDetailName').textContent=name;
-    document.getElementById('qDetailMobile').textContent='+91 '+d;
-    document.getElementById('qDetailPincode').textContent=pincode||'-';
-    document.getElementById('qDetailMembers').textContent=membersStr||'-';
-    document.getElementById('qDetailMedical').textContent=medStr;
-
+    // 2) AWAIT CRM lead creation before showing thank you
+    if(window.saveWebsiteLead && typeof window.saveWebsiteLead === 'function'){
+      try {
+        var result = await window.saveWebsiteLead();
+        
+        if(result && result.success){
+          // SUCCESS: Show thank you screen with customer details
+          document.getElementById('qDetailName').textContent=name;
+          document.getElementById('qDetailMobile').textContent='+91 '+d;
+          document.getElementById('qDetailPincode').textContent=pincode||'-';
+          document.getElementById('qDetailMembers').textContent=membersStr||'-';
+          document.getElementById('qDetailMedical').textContent=medStr;
+          
+          show('done');
+        } else {
+          // FAILURE: Show error message, keep form data, enable retry
+          var errorMsg = (result && result.error) ? result.error : 'Failed to save to CRM. Please try again.';
+          err('fspErr5', 'Error: ' + errorMsg);
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      } catch(err) {
+        console.error('CRM submission error:', err);
+        err('fspErr5', 'Error: ' + (err.message || 'CRM submission failed'));
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    } else {
+      console.warn('saveWebsiteLead function not available');
+      err('fspErr5', 'System not ready. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
     show('done');
   });
 
