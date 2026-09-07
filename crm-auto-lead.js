@@ -152,18 +152,25 @@
         "Duplicate check failed:",
         existing.error.message
       );
-      return;
+      return { success: false, error: "Duplicate check failed: " + existing.error.message };
     }
 
-    // Duplicate lead found
+    // Duplicate lead found - return success without creating new lead
     if (
       existing.data &&
       existing.data.length
     ) {
+      var existingLeadId = existing.data[0].id;
       console.log(
-        "Duplicate website lead skipped"
+        "Duplicate website lead found, skipped creation:",
+        existingLeadId
       );
-      return;
+      return { 
+        success: true, 
+        duplicate: true, 
+        lead_id: existingLeadId,
+        message: "Lead already exists for this mobile number"
+      };
     }
 
     // Detect lead source from URL parameter
@@ -210,7 +217,7 @@
         "Website lead save failed:",
         insert.error.message
       );
-      return;
+      return { success: false, error: "Failed to save lead: " + insert.error.message };
     }
 
     if (
@@ -220,7 +227,10 @@
       console.error(
         "Lead created but ID not returned"
       );
-      return;
+      return {
+        success: false,
+        error: "Lead was saved but no lead ID was returned. Please contact support."
+      };
     }
 
     var leadId =
@@ -300,32 +310,17 @@
     console.log(
       "Website lead + activity + task saved successfully"
     );
+    
+    return { 
+      success: true, 
+      lead_id: leadId, 
+      full_name: fullName, 
+      mobile_number: mobile 
+    };
   }
 
-  // Listen for Website Quote Form submit button
-  document.addEventListener(
-    "click",
-    function (event) {
-      var button =
-        event.target &&
-        event.target.closest
-          ? event.target.closest(
-              "#fspQSubmit"
-            )
-          : null;
+  // Expose function globally for index.html to call
+  window.saveWebsiteLead = saveWebsiteLead;
 
-      if (!button) {
-        return;
-      }
 
-      saveWebsiteLead()
-        .catch(function (error) {
-          console.error(
-            "CRM integration error:",
-            error
-          );
-        });
-    },
-    true
-  );
 })();
