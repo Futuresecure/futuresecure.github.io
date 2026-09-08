@@ -91,7 +91,7 @@
       var medStr = med.length ? med.join(", ") : "இல்லை";
 
       var us = sessionStorage.getItem("fsp_utm_source") || "";
-      var leadSource = us === "MetaAds" ? "Meta Ads" : (us ? us : "Website Quote Form");
+      var leadSource = us === "MetaAds" ? "Meta Ads" : "Website";
 
       var notes = [];
       if (membersStr) notes.push("Family: " + membersStr);
