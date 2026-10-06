@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cjwxirpwzluynymwjzxl.supabase.co" crossorigin>
 <link rel="icon" type="image/x-icon" href="../pwa-icon.svg">
-<link rel="manifest" href="./manifest.json?v=47">
+<link rel="manifest" href="./manifest.json?v=48">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
@@ -1902,6 +1902,7 @@ function rescheduleAppointment(id){
 const appt=currentAppointments.find(a=>a.id===id);
 if(!appt)return;
 closeAppointmentModal();
+currentEditingAppointmentId=id;
 openAppointmentFormModal(appt.lead_id,id,true);
 }
 
@@ -1979,6 +1980,7 @@ document.getElementById("deleteApptButton").style.display=(isEditMode&&!reschedu
 const saveBtn=document.querySelector("#appointmentFormModal .followup-modal-actions .btn-primary");
 if(saveBtn)saveBtn.textContent=rescheduleMode?"Save & Send WhatsApp":"Save Appointment";
 document.getElementById("appointmentFormModal").dataset.rescheduleMode=rescheduleMode?"1":"0";
+document.getElementById("appointmentFormModal").dataset.appointmentId=appointmentId?String(appointmentId):"";
 if(!isEditMode&&selectedLeadId){
 autoFillLeadData();
 }
@@ -2004,8 +2006,12 @@ if(!customerName||!mobile||!date||!time||!status){alert("Please fill all require
 
 const formData={lead_id:leadId,customer_name:customerName,mobile_number:mobile,appointment_date:date,appointment_time:time,status:status,notes:notes||null};
 
-if(currentEditingAppointmentId){
-await updateAppointment(currentEditingAppointmentId,formData);
+const modal=document.getElementById("appointmentFormModal");
+const rescheduleMode=modal.dataset.rescheduleMode==="1";
+const appointmentId=parseInt(modal.dataset.appointmentId||"0")||currentEditingAppointmentId;
+if(appointmentId){
+await updateAppointment(appointmentId,formData);
+if(rescheduleMode) await sendAppointmentRescheduleWhatsApp(formData);
 }else{
 await saveAppointment(formData);
 }
@@ -2190,7 +2196,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('cli
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('./service-worker.js?v=47', { scope: './', updateViaCache: 'none' });
+      const registration = await navigator.serviceWorker.register('./service-worker.js?v=48', { scope: './', updateViaCache: 'none' });
       await registration.update();
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       registration.addEventListener('updatefound', () => {
