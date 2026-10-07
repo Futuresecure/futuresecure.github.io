@@ -333,7 +333,9 @@ const savedPreviousPage=localStorage.getItem("crm_previous_page");
 const savedSessionUser=localStorage.getItem("crm_session_user");
 const currentSessionUser=currentUser?.id||"";
 const shouldRestorePage=savedPage&&savedSessionUser&&savedSessionUser===currentSessionUser;
-const pageToShow=shouldRestorePage?savedPage:"dashboard";
+const calendarReturn=new URLSearchParams(window.location.search).get("calendar")==="connected";
+const pageToShow=calendarReturn?"calendar":(shouldRestorePage?savedPage:"dashboard");
+if(calendarReturn){history.replaceState(null,"",window.location.pathname);}
 
 if(leadId&&pageToShow==="leadProfile"){
   previousPage=savedPreviousPage||"leads";
@@ -355,6 +357,7 @@ const target=document.getElementById(pageToShow+"Page");
 if(target)target.classList.remove("hidden");
 else document.getElementById("dashboardPage").classList.remove("hidden");
 showPage(pageToShow,document.querySelector('[data-page="'+pageToShow+'"]'));
+if(pageToShow==="calendar")void loadCalendar();
 }
 function updateHeaderForAuthenticatedUser(user){document.getElementById("currentUserDisplay").textContent=user.email||"User";document.getElementById("logoutButton").style.display="inline-block";}
 function updateHeaderForLoggedOut(){document.getElementById("currentUserDisplay").textContent="Administrator";document.getElementById("logoutButton").style.display="none";}
@@ -1602,6 +1605,7 @@ let currentEditingAppointmentId=null;
 let appointmentSaveInProgress=false;
 
 async function loadCalendar(){
+  if(typeof refreshGoogleCalendarStatus==="function")void refreshGoogleCalendarStatus();
   if(!currentUser){console.warn("No authenticated user");return;}
   const year=currentCalendarMonth.getFullYear();
   const month=String(currentCalendarMonth.getMonth()+1).padStart(2,"0");
@@ -2245,5 +2249,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<script src="./google-calendar.js?v=1"></script>
 </body>
 </html>
