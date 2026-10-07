@@ -1886,7 +1886,7 @@ const {data,error}=await supabaseClient.from("appointments").insert([payload]).s
 if(error){alert("Error saving appointment: "+error.message);return false;}
 await processWhatsAppAutomationQueue();
 const calendarSynced=await syncAppointmentGoogleCalendar(data.id);
-showMessage(calendarSynced?"Appointment created successfully & Google Calendar synced!":"Appointment saved, but Google Calendar sync failed. Please retry.","${calendarSynced?"success":"error"}");
+showMessage(calendarSynced?"Appointment created successfully & Google Calendar synced!":"Appointment saved, but Google Calendar sync failed. Please retry.",calendarSynced?"success":"error");
 closeAppointmentModal();
 await loadCalendar();
 return true;
