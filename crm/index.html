@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cjwxirpwzluynymwjzxl.supabase.co" crossorigin>
 <link rel="icon" type="image/x-icon" href="../pwa-icon.svg">
-<link rel="manifest" href="./manifest.json?v=48">
+<link rel="manifest" href="./manifest.json?v=49">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
@@ -1863,6 +1863,20 @@ function closeDateScheduleModal(){
 document.getElementById("dateScheduleModal").classList.remove("show");
 }
 
+
+async function syncAppointmentGoogleCalendar(appointmentId){
+ try{
+  const {data,error}=await supabaseClient.functions.invoke("appointment-calendar-sync",{body:{appointment_id:Number(appointmentId)}});
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.error||"Google Calendar sync failed");
+  return true;
+ }catch(e){
+  console.error("Google Calendar sync failed",e);
+  showMessage("Appointment saved, but Google Calendar sync failed. Please retry.","error");
+  return false;
+ }
+}
+
 async function saveAppointment(formData){
 if(!currentUser){alert("Not authenticated");return false;}
 if(!formData.lead_id||!formData.customer_name||!formData.mobile_number||!formData.appointment_date||!formData.appointment_time||!formData.status){
@@ -1871,6 +1885,7 @@ const payload={...formData,created_by:currentUser.id};
 const {data,error}=await supabaseClient.from("appointments").insert([payload]).select().single();
 if(error){alert("Error saving appointment: "+error.message);return false;}
 await processWhatsAppAutomationQueue();
+await syncAppointmentGoogleCalendar(data.id);
 showMessage("Appointment created successfully!","success");
 closeAppointmentModal();
 await loadCalendar();
@@ -1886,6 +1901,7 @@ alert("Please fill all required fields");return false;}
 const updatePayload={customer_name:formData.customer_name,mobile_number:formData.mobile_number,appointment_date:formData.appointment_date,appointment_time:formData.appointment_time,status:formData.status,notes:formData.notes};
 const {data,error}=await supabaseClient.from("appointments").update(updatePayload).eq("id",id).select("id").single();
 if(error||!data){alert("Error updating appointment: "+(error?.message||"Appointment was not updated. Please reload Calendar."));return false;}
+await syncAppointmentGoogleCalendar(data.id);
 // Remove stale date details before refreshing the calendar and schedule list.
 closeDateScheduleModal();
 closeAppointmentModal();
@@ -2223,7 +2239,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('cli
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('./service-worker.js?v=48', { scope: './', updateViaCache: 'none' });
+      const registration = await navigator.serviceWorker.register('./service-worker.js?v=49', { scope: './', updateViaCache: 'none' });
       await registration.update();
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       registration.addEventListener('updatefound', () => {
