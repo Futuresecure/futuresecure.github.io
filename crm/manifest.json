@@ -11,14 +11,14 @@
   "icons": [
     {
       "src": "../pwa-icon.svg",
-      "sizes": "2048x2048",
-      "type": "image/jpeg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
       "src": "../pwa-icon.svg",
-      "sizes": "2048x2048",
-      "type": "image/jpeg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
@@ -35,8 +35,8 @@
       "icons": [
         {
           "src": "../pwa-icon.svg",
-          "sizes": "2048x2048",
-          "type": "image/jpeg"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     },
@@ -48,8 +48,8 @@
       "icons": [
         {
           "src": "../pwa-icon.svg",
-          "sizes": "2048x2048",
-          "type": "image/jpeg"
+          "sizes": "any",
+          "type": "image/svg+xml"
         }
       ]
     }
