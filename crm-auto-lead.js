@@ -105,26 +105,7 @@
       // Create client
       var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // Duplicate check
-      var existing = await client
-        .from("leads")
-        .select("id")
-        .eq("mobile_number", mobile)
-        .limit(1);
-
-      if (existing.error) {
-        return { success: false, error: "Duplicate check failed: " + existing.error.message };
-      }
-
-      if (existing.data && existing.data.length > 0) {
-        return {
-          success: true,
-          duplicate: true,
-          lead_id: existing.data[0].id,
-          message: "Lead already exists"
-        };
-      }
-
+      // Server RPC handles existing contacts and enquiry-level deduplication.
       // Call RPC function
       var rpcResult = await client.rpc('handle_website_lead_creation', {
         p_full_name: fullName,
@@ -148,6 +129,7 @@
 
       return {
         success: true,
+        duplicate: !!responseData.duplicate,
         lead_id: responseData.lead_id,
         full_name: fullName,
         mobile_number: mobile
