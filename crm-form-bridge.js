@@ -56,12 +56,7 @@
       var supabase = await getSupabase();
       var client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      var existing = await client.from("leads").select("id").eq("mobile_number", mobile).limit(1);
-      if (existing.error) throw existing.error;
-
-      if (existing.data && existing.data.length) {
-        return { success: true, duplicate: true, lead_id: existing.data[0].id };
-      }
+      // Enquiry-level deduplication belongs to the server RPC, not a mobile-only lookup.
 
       var notes = String(payload.notes || "").trim();
       var product = String(payload.product || "").trim();
@@ -83,7 +78,7 @@
 
       return {
         success: true,
-        duplicate: false,
+        duplicate: !!rpc.data.duplicate,
         lead_id: rpc.data.lead_id,
         full_name: fullName,
         mobile_number: mobile
